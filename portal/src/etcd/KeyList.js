@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import BACKEND_HOST from '../const';
+import { Base64 } from "js-base64";
 
 const KeyListFetch = () => {
 
@@ -81,7 +82,7 @@ const KeyListFetch = () => {
     event, // MuiEvent<React.MouseEvent<HTMLElement>>
     details, // GridCallbackDetails
   ) => {
-    navigate(`/etcd/keys/${encodeURIComponent(params.row.key)}`)
+    navigate(`/etcd/keys/${Base64.encode(params.row.key)}`)
   };
 
   return (

@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -65,10 +66,12 @@ type GetKeyResp struct {
 func (h *Handler) keyHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["key"]
-	logrus.Infof("begin to get key %s", key)
-	content, err := h.GetKeyContent(r.Context(), key)
+	decodeKeyByte, err := base64.StdEncoding.DecodeString(key)
+	decodeKey := string(decodeKeyByte)
+	logrus.Infof("begin to get key %s", decodeKey)
+	content, err := h.GetKeyContent(r.Context(), decodeKey)
 	if err != nil {
-		logrus.Errorf("get key %s content failed, err: %v", key, err)
+		logrus.Errorf("get key %s content failed, err: %v", decodeKey, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

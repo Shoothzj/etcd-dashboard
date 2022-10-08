@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -16,8 +17,10 @@ func (h *Handler) keyDecodeHandler(w http.ResponseWriter, r *http.Request) {
 	decodeNamespace := r.URL.Query().Get("decodeNamespace")
 	vars := mux.Vars(r)
 	key := vars["key"]
-	logrus.Infof("begin to decode key %s component: %s, namespace: %s", key, decodeComponent, decodeNamespace)
-	content, err := h.GetKeyContent(r.Context(), key)
+	decodeKeyByte, err := base64.StdEncoding.DecodeString(key)
+	decodeKey := string(decodeKeyByte)
+	logrus.Infof("begin to decode key %s component: %s, namespace: %s", decodeKey, decodeComponent, decodeNamespace)
+	content, err := h.GetKeyContent(r.Context(), decodeKey)
 	if err != nil {
 		logrus.Errorf("get key %s content failed, err: %v", key, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -25,7 +28,7 @@ func (h *Handler) keyDecodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	str, err := decode(decodeComponent, decodeNamespace, content)
 	if err != nil {
-		logrus.Errorf("decode key %s content failed component: %s, namespace: %s, err: %v", key, decodeComponent, decodeNamespace, err)
+		logrus.Errorf("decode key %s content failed component: %s, namespace: %s, err: %v", decodeKey, decodeComponent, decodeNamespace, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
