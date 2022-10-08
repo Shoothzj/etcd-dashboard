@@ -1,3 +1,3 @@
-const BACKEND_HOST = location.origin
+const BACKEND_HOST = window.location.origin;
 
-export default BACKEND_HOST
+export default BACKEND_HOST;

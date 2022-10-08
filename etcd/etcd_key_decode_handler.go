@@ -1,8 +1,8 @@
 package etcd
 
 import (
-	"encoding/base64"
 	"encoding/json"
+	"etcd-dashboard/util"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -17,8 +17,12 @@ func (h *Handler) keyDecodeHandler(w http.ResponseWriter, r *http.Request) {
 	decodeNamespace := r.URL.Query().Get("decodeNamespace")
 	vars := mux.Vars(r)
 	key := vars["key"]
-	decodeKeyByte, err := base64.StdEncoding.DecodeString(key)
-	decodeKey := string(decodeKeyByte)
+	decodeKey, err := util.Base64Decode(key)
+	if err != nil {
+		logrus.Errorf("base64 decode key %s failed, err: %v", key, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	logrus.Infof("begin to decode key %s component: %s, namespace: %s", decodeKey, decodeComponent, decodeNamespace)
 	content, err := h.GetKeyContent(r.Context(), decodeKey)
 	if err != nil {

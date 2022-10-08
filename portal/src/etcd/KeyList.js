@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { DataGrid, GridEventListener, GridToolbar } from '@mui/x-data-grid';
+import React, { useEffect, useState } from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import {
   Box,
   Button,
@@ -8,19 +8,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  TextField
+  TextField,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { Base64 } from 'js-base64';
 import BACKEND_HOST from '../const';
-import { Base64 } from "js-base64";
 
-const KeyListFetch = () => {
+function KeyList() {
+  const columns = [{ field: 'key', headerName: 'Key', width: 300 }];
 
-  const columns = [
-    { field: 'key', headerName: 'Key', width: 300 },
-  ]
-
-  const [keys, setKeys] = useState([])
+  const [keys, setKeys] = useState([]);
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
@@ -40,49 +37,46 @@ const KeyListFetch = () => {
     setDialogOpen(true);
   };
 
+  const fetchKeys = async () => {
+    const response = await fetch(`${BACKEND_HOST}/api/etcd/keys`);
+    const data = await response.json();
+    setKeys(data.map((aux) => ({ id: aux, key: aux })));
+  };
+
   const handlePutKey = () => {
-    fetch(BACKEND_HOST + '/api/etcd/keys', {
+    fetch(`${BACKEND_HOST}/api/etcd/keys`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        key: key,
-        value: value
-      })
+        key,
+        value,
+      }),
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
+      .then((response) => response.json())
+      .then((data) => {
         setDialogOpen(false);
         setKey('');
         setValue('');
         fetchKeys();
       })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+      .catch((error) => {});
     setDialogOpen(false);
   };
 
   const navigate = useNavigate();
 
-  const fetchKeys = async () => {
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys')
-    const data = await response.json()
-    setKeys(data.map((key) => ({ id: key, key: key })))
-  }
-
   useEffect(() => {
-    fetchKeys()
-  }, [])
+    fetchKeys();
+  }, []);
 
-  const handleEvent: GridEventListener<'rowClick'> = (
+  const handleEvent = (
     params, // GridRowParams
     event, // MuiEvent<React.MouseEvent<HTMLElement>>
     details, // GridCallbackDetails
   ) => {
-    navigate(`/etcd/keys/${Base64.encode(params.row.key)}`)
+    navigate(`/etcd/keys/${Base64.encode(params.row.key)}`);
   };
 
   return (
@@ -94,9 +88,7 @@ const KeyListFetch = () => {
       <Dialog open={dialogOpen} onClose={handlePutKey}>
         <DialogTitle>Subscribe</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Please form the key and value
-          </DialogContentText>
+          <DialogContentText>Please form the key and value</DialogContentText>
           <TextField
             autoFocus
             margin="dense"
@@ -126,19 +118,20 @@ const KeyListFetch = () => {
         </DialogActions>
       </Dialog>
       <Box sx={{ height: 600, width: '100%' }}>
-        <DataGrid onRowClick={handleEvent}
-                  rows={keys}
-                  columns={columns}
-                  pageSize={10}
-                  rowsPerPageOptions={[10]}
-                  checkboxSelection
-                  disableSelectionOnClick
-                  experimentalFeatures={{ newEditingApi: true }}
-                  components={{ Toolbar: GridToolbar }}
+        <DataGrid
+          onRowClick={handleEvent}
+          rows={keys}
+          columns={columns}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
+          checkboxSelection
+          disableSelectionOnClick
+          experimentalFeatures={{ newEditingApi: true }}
+          components={{ Toolbar: GridToolbar }}
         />
       </Box>
     </div>
-  )
+  );
 }
 
-export default KeyListFetch
+export default KeyList;
