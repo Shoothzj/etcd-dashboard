@@ -2,6 +2,7 @@ import { useParams } from 'react-router';
 import React, { useEffect, useState } from 'react'
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import BACKEND_HOST from '../const';
+import { Base64 } from "js-base64";
 
 const KeyPage = () => {
 
@@ -10,7 +11,7 @@ const KeyPage = () => {
   const [content, setContent] = useState([]);
 
   const fetchKey = async () => {
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + encodeURIComponent(key));
+    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + Base64.encode(key));
     const data = await response.json();
     setContent(data.content);
   }
@@ -34,7 +35,7 @@ const KeyPage = () => {
   const handleClick = async () => {
     setDecodeIsLoading(true);
 
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys-decode/' + encodeURIComponent(key) + '?decodeComponent=' + decodeComponent + '&decodeNamespace=' + decodeNamespace);
+    const response = await fetch(BACKEND_HOST + '/api/etcd/keys-decode/' + Base64.encode(key) + '?decodeComponent=' + decodeComponent + '&decodeNamespace=' + decodeNamespace);
     if (!response.ok) {
       setErr(err.message);
       setDecodeIsLoading(false);
@@ -54,7 +55,7 @@ const KeyPage = () => {
 
   return (
     <div>
-      <h1>Key: {key}</h1>
+      <h1>Key: {Base64.decode(key)}</h1>
       <h1>Content: </h1>
       <p>{content}</p>
       <Box>
