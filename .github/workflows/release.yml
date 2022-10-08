@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  release:
+    name: Release binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+      - run: bash -x build.sh
+      - run: zip -r etcd-dashboard.zip dist
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag release
+        uses: tvdias/github-tagger@v0.0.2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest
+
+      # Creates the new release with the binary as a release asset.
+      # If the previous Action was skipped, then this keeps the same tag as the
+      # previous release.
+      - name: Create new release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: "Latest"
+          name: "latest"
+          tag_name: latest
+          files: |
+            etcd-dashboard.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
