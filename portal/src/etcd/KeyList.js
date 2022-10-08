@@ -16,7 +16,7 @@ const KeyListFetch = () => {
   const navigate = useNavigate();
 
   const fetchKeys = async () => {
-    const response = await fetch('http://localhost:10001/api/etcd/keys')
+    const response = await fetch(BACKEND_HOST + '/api/etcd/keys')
     const data = await response.json()
     setKeys(data.map((key) => ({ id: key, key: key })))
   }
