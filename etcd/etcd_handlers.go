@@ -40,7 +40,7 @@ func NewHandler(host string, port int, tlsEnabled bool, certFile string, keyFile
 }
 
 func (h *Handler) Handle(subRouter *mux.Router) {
-	subRouter.HandleFunc("/keys", h.keysHandler)
-	subRouter.HandleFunc("/keys/{key}", h.keyHandler)
-	subRouter.HandleFunc("/keys/{key}/decode", h.keyHandler)
+	subRouter.HandleFunc("/keys", h.keysHandler).Methods("GET")
+	subRouter.HandleFunc("/keys/{key:.*}", h.keyHandler).Methods("GET")
+	subRouter.HandleFunc("/keys-decode/{key:.*}", h.keyDecodeHandler)
 }

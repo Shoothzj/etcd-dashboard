@@ -31,7 +31,7 @@ const KeyListFetch = () => {
     event, // MuiEvent<React.MouseEvent<HTMLElement>>
     details, // GridCallbackDetails
   ) => {
-    navigate(`/etcd/keys/${params.row.key}`)
+    navigate(`/etcd/keys/${encodeURIComponent(params.row.key)}`)
   };
 
   return (

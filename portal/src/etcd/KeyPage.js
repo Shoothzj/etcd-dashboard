@@ -10,7 +10,7 @@ const KeyPage = () => {
   const [content, setContent] = useState([]);
 
   const fetchKey = async () => {
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + key);
+    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + encodeURIComponent(key));
     const data = await response.json();
     setContent(data.content);
   }
@@ -34,7 +34,7 @@ const KeyPage = () => {
   const handleClick = async () => {
     setDecodeIsLoading(true);
 
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + key + '/decode?decodeComponent=' + decodeComponent + '&decodeNamespace=' + decodeNamespace);
+    const response = await fetch(BACKEND_HOST + '/api/etcd/keys-decode/' + encodeURIComponent(key) + '?decodeComponent=' + decodeComponent + '&decodeNamespace=' + decodeNamespace);
     if (!response.ok) {
       setErr(err.message);
       setDecodeIsLoading(false);

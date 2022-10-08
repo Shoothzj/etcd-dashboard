@@ -16,7 +16,7 @@ func (h *Handler) keyDecodeHandler(w http.ResponseWriter, r *http.Request) {
 	decodeNamespace := r.URL.Query().Get("decodeNamespace")
 	vars := mux.Vars(r)
 	key := vars["key"]
-	logrus.Infof("begin to get key %s component: %s, namespace: %s", key, decodeComponent, decodeNamespace)
+	logrus.Infof("begin to decode key %s component: %s, namespace: %s", key, decodeComponent, decodeNamespace)
 	content, err := h.GetKeyContent(r.Context(), key)
 	if err != nil {
 		logrus.Errorf("get key %s content failed, err: %v", key, err)
