@@ -10,7 +10,30 @@ import (
 	"time"
 )
 
-func (h *Handler) keysHandler(w http.ResponseWriter, r *http.Request) {
+type PutKeyReq struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+func (h *Handler) keyPutHandler(w http.ResponseWriter, r *http.Request) {
+	var req PutKeyReq
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	logrus.Infof("begin to put key %s", req.Key)
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+	_, err = h.client.Put(ctx, req.Key, req.Value)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) keysListHandler(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("begin to list keys")
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
@@ -36,7 +59,7 @@ func (h *Handler) keysHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type GetKeyResp struct {
-	Content []byte `json:"content"`
+	Content string `json:"content"`
 }
 
 func (h *Handler) keyHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +73,7 @@ func (h *Handler) keyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := GetKeyResp{
-		Content: content,
+		Content: string(content),
 	}
 	payload, err := json.Marshal(resp)
 	if err != nil {
