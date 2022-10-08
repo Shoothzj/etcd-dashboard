@@ -1,6 +1,7 @@
 package etcd
 
 import (
+	"crypto/tls"
 	"etcd-dashboard/util"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -16,7 +17,8 @@ func NewHandler(host string, port int, tlsEnabled bool, certFile string, keyFile
 	var client *v3.Client
 	var err error
 	if tlsEnabled {
-		tlsConfig, err := util.NewTLSConfig(certFile, keyFile, caFile)
+		var tlsConfig *tls.Config
+		tlsConfig, err = util.NewTLSConfig(certFile, keyFile, caFile)
 		if err != nil {
 			return nil, err
 		}

@@ -1,20 +1,19 @@
 import { useParams } from 'react-router';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Base64 } from 'js-base64';
 import BACKEND_HOST from '../const';
-import { Base64 } from "js-base64";
 
-const KeyPage = () => {
-
+function KeyPage() {
   const { key } = useParams();
 
   const [content, setContent] = useState([]);
 
   const fetchKey = async () => {
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys/' + Base64.encode(key));
+    const response = await fetch(`${BACKEND_HOST}/api/etcd/keys/${key}`);
     const data = await response.json();
     setContent(data.content);
-  }
+  };
 
   const [decodeComponent, setDecodeComponent] = React.useState('');
 
@@ -35,7 +34,9 @@ const KeyPage = () => {
   const handleClick = async () => {
     setDecodeIsLoading(true);
 
-    const response = await fetch(BACKEND_HOST + '/api/etcd/keys-decode/' + Base64.encode(key) + '?decodeComponent=' + decodeComponent + '&decodeNamespace=' + decodeNamespace);
+    const response = await fetch(
+      `${BACKEND_HOST}/api/etcd/keys-decode/${key}?decodeComponent=${decodeComponent}&decodeNamespace=${decodeNamespace}`,
+    );
     if (!response.ok) {
       setErr(err.message);
       setDecodeIsLoading(false);
@@ -50,12 +51,15 @@ const KeyPage = () => {
   };
 
   useEffect(() => {
-    fetchKey()
-  }, [])
+    fetchKey();
+  }, []);
 
   return (
     <div>
-      <h1>Key: {Base64.decode(key)}</h1>
+      <h1>
+        Key:
+        {Base64.decode(key)}
+      </h1>
       <h1>Content: </h1>
       <p>{content}</p>
       <Box>
@@ -68,10 +72,9 @@ const KeyPage = () => {
               id="decode-component-select"
               value={decodeComponent}
               label="DecodeComponent"
-              onChange={handleComponentChange}
-            >
-              <MenuItem value='ApiSix'>ApiSix</MenuItem>
-              <MenuItem value='Kubernetes'>Kubernetes</MenuItem>
+              onChange={handleComponentChange}>
+              <MenuItem value="ApiSix">ApiSix</MenuItem>
+              <MenuItem value="Kubernetes">Kubernetes</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth>
@@ -81,20 +84,21 @@ const KeyPage = () => {
               id="decode-namespace-select"
               value={decodeNamespace}
               label="DecodeNamespace"
-              onChange={handleNamespaceChange}
-            >
-              <MenuItem value='Minions'>Minions</MenuItem>
-              <MenuItem value='Pods'>Pods</MenuItem>
+              onChange={handleNamespaceChange}>
+              <MenuItem value="Minions">Minions</MenuItem>
+              <MenuItem value="Pods">Pods</MenuItem>
             </Select>
           </FormControl>
         </div>
       </Box>
       {err && <h2>{err}</h2>}
-      <Button onClick={handleClick} variant="contained">Decode</Button>
+      <Button onClick={handleClick} variant="contained">
+        Decode
+      </Button>
       {decodeIsLoading && <h2>Loading...</h2>}
       {decodeData && <p>{JSON.stringify(decodeData)}</p>}
     </div>
   );
 }
 
-export default KeyPage
+export default KeyPage;

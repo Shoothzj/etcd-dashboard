@@ -1,0 +1,20 @@
+name: es lint
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - portal/**
+jobs:
+  es_lint:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest
+      - run: npm install -g eslint
+        working-directory: portal
+      - run: npm install && eslint src --ext .html,.js
+        working-directory: portal
