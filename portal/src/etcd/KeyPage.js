@@ -90,15 +90,10 @@ function KeyPage() {
         open={open}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"hex content"}
-        </DialogTitle>
+        aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">hex content</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {hexContent}
-          </DialogContentText>
+          <DialogContentText id="alert-dialog-description">{hexContent}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} autoFocus>
