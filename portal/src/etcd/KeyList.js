@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Base64 } from 'js-base64';
-import BACKEND_HOST from '../const';
+import BACKEND_HOST from '../Const';
 
 function KeyList() {
   const columns = [{ field: 'key', headerName: 'Key', width: 300 }];
@@ -86,7 +86,7 @@ function KeyList() {
         Put Key
       </Button>
       <Dialog open={dialogOpen} onClose={handlePutKey}>
-        <DialogTitle>Subscribe</DialogTitle>
+        <DialogTitle>Put Key</DialogTitle>
         <DialogContent>
           <DialogContentText>Please form the key and value</DialogContentText>
           <TextField

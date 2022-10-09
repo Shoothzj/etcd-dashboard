@@ -7,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
-import BACKEND_HOST from '../const';
+import BACKEND_HOST from '../Const';
 
 function KeyPage() {
   const { key } = useParams();
@@ -137,7 +137,7 @@ function KeyPage() {
         Decode
       </Button>
       {decodeIsLoading && <h2>Loading...</h2>}
-      {decodeData && <p>{JSON.stringify(decodeData)}</p>}
+      {decodeData && <p style={{ whiteSpace: 'pre-wrap' }}>{decodeData.toString()}</p>}
     </div>
   );
 }
