@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"etcd-dashboard/util"
 	"github.com/gorilla/mux"
@@ -66,23 +67,32 @@ type GetKeyResp struct {
 func (h *Handler) keyHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["key"]
+	codec := r.URL.Query().Get("codec")
 	decodeKey, err := util.Base64Decode(key)
 	if err != nil {
 		logrus.Errorf("base64 decode key %s failed, err: %v", key, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	logrus.Infof("begin to get key %s", decodeKey)
+	logrus.Infof("begin to get key %s codec %s", decodeKey, codec)
 	content, err := h.GetKeyContent(r.Context(), decodeKey)
 	if err != nil {
 		logrus.Errorf("get key %s content failed, err: %v", decodeKey, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	resp := GetKeyResp{
-		Content: string(content),
+	if codec != "" {
+		resp(w, hex.EncodeToString(content))
+	} else {
+		resp(w, string(content))
 	}
-	payload, err := json.Marshal(resp)
+}
+
+func resp(w http.ResponseWriter, content string) {
+	resps := GetKeyResp{
+		Content: content,
+	}
+	payload, err := json.Marshal(resps)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

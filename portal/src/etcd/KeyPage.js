@@ -2,6 +2,11 @@ import { useParams } from 'react-router';
 import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { Base64 } from 'js-base64';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
 import BACKEND_HOST from '../const';
 
 function KeyPage() {
@@ -9,10 +14,27 @@ function KeyPage() {
 
   const [content, setContent] = useState([]);
 
+  const [hexContent, setHexContent] = useState([]);
+
+  const [open, setOpen] = React.useState(false);
   const fetchKey = async () => {
     const response = await fetch(`${BACKEND_HOST}/api/etcd/keys/${key}`);
     const data = await response.json();
     setContent(data.content);
+  };
+
+  const fetchHexKey = async () => {
+    const response = await fetch(`${BACKEND_HOST}/api/etcd/keys/${key}?codec=hex`);
+    const data = await response.json();
+    setHexContent(data.content);
+  };
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const [decodeComponent, setDecodeComponent] = React.useState('');
@@ -52,6 +74,7 @@ function KeyPage() {
 
   useEffect(() => {
     fetchKey();
+    fetchHexKey();
   }, []);
 
   return (
@@ -60,6 +83,24 @@ function KeyPage() {
         Key:
         {Base64.decode(key)}
       </h1>
+      <Button variant="contained" onClick={handleClickOpen}>
+        show hex
+      </Button>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description">
+        <DialogTitle id="alert-dialog-title">hex content</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">{hexContent}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} autoFocus>
+            close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <h1>Content: </h1>
       <p>{content}</p>
       <Box>

@@ -14,3 +14,7 @@ curl localhost:10001/api/etcd/keys
 ```bash
 curl localhost:10001/api/etcd/keys/k1
 ```
+### get key as hex
+```bash
+curl localhost:10001/api/etcd/keys/k1?codec=hex
+```
