@@ -17,6 +17,10 @@ type PutKeyReq struct {
 	Value string `json:"value"`
 }
 
+type DeleteKeyReq struct {
+	DeleteKeys []string `json:"deleteKeys"`
+}
+
 func (h *Handler) keyPutHandler(w http.ResponseWriter, r *http.Request) {
 	var req PutKeyReq
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -58,6 +62,25 @@ func (h *Handler) keysListHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Errorf("write response fail. %s", err)
 	}
+}
+
+func (h *Handler) keysDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	var req DeleteKeyReq
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+	for _, key := range req.DeleteKeys {
+		_, err = h.client.Delete(ctx, key)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 type GetKeyResp struct {
