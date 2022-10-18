@@ -23,10 +23,16 @@ function KeyList() {
 
   const [key, setKey] = React.useState('');
 
+  const [deleteKeys, setDeleteKeys] = React.useState([]);
+
   const [value, setValue] = React.useState('');
 
   const handleKeyChanged = (event) => {
     setKey(event.target.value);
+  };
+
+  const handleDKeysChanged = (itm) => {
+    setDeleteKeys(itm);
   };
 
   const handleValueChanged = (event) => {
@@ -41,6 +47,18 @@ function KeyList() {
     const response = await fetch(`${BACKEND_HOST}/api/etcd/keys`);
     const data = await response.json();
     setKeys(data.map((aux) => ({ id: aux, key: aux })));
+  };
+
+  const handleClickDelKeys = () => {
+    fetch(`${BACKEND_HOST}/api/etcd/keys-delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        deleteKeys,
+      }),
+    });
   };
 
   const handlePutKey = () => {
@@ -85,6 +103,9 @@ function KeyList() {
       <Button variant="contained" onClick={handleClickOpen}>
         Put Key
       </Button>
+      <Button variant="contained" onClick={handleClickDelKeys}>
+        Delete Key
+      </Button>
       <Dialog open={dialogOpen} onClose={handlePutKey}>
         <DialogTitle>Put Key</DialogTitle>
         <DialogContent>
@@ -125,6 +146,7 @@ function KeyList() {
           pageSize={10}
           rowsPerPageOptions={[10]}
           checkboxSelection
+          onSelectionModelChange={handleDKeysChanged}
           disableSelectionOnClick
           experimentalFeatures={{ newEditingApi: true }}
           components={{ Toolbar: GridToolbar }}

@@ -46,4 +46,5 @@ func (h *Handler) Handle(subRouter *mux.Router) {
 	subRouter.HandleFunc("/keys", h.keysListHandler).Methods("GET")
 	subRouter.HandleFunc("/keys/{key:.*}", h.keyHandler).Methods("GET")
 	subRouter.HandleFunc("/keys-decode/{key:.*}", h.keyDecodeHandler)
+	subRouter.HandleFunc("/keys-delete", h.keysDeleteHandler).Methods("POST")
 }
