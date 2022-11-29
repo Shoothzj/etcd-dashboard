@@ -18,6 +18,9 @@
 package main
 
 import (
+	"context"
+	"etcd-dashboard/etcd"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -50,9 +53,75 @@ var (
 )
 
 func backup() {
+	handler, err := etcd.NewHandler(etcdHost, etcdPort, etcdTlsEnabled, etcdCert, etcdKey, etcdCA)
+	if err != nil {
+		logrus.Errorf("create client failed: %v", err)
+		os.Exit(1)
+	}
+	allKeyContent, err := handler.GetAllKeyContent(context.TODO())
+	if err != nil {
+		logrus.Errorf("get all key content failed: %v", err)
+		os.Exit(1)
+	}
+
+	for _, kv := range allKeyContent {
+		name := fmt.Sprintf("%s%s%s", backupPath, string(os.PathSeparator), string(kv.Key))
+		file, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC, 0600)
+		if err != nil {
+			logrus.Errorf("create file(%s) failed: %v", name, err)
+		} else {
+			_, err = file.Write(kv.Value)
+			if err != nil {
+				logrus.Errorf("writing file(%s) failed: %v", name, err)
+			}
+		}
+		err = file.Close()
+		if err != nil {
+			logrus.Errorf("close fd(%s) failed: %v", name, err)
+		}
+	}
 }
 
 func restore() {
+	handler, err := etcd.NewHandler(etcdHost, etcdPort, etcdTlsEnabled, etcdCert, etcdKey, etcdCA)
+	if err != nil {
+		logrus.Errorf("create client failed: %v", err)
+		os.Exit(1)
+	}
+
+	filePath, err := os.Open(backupPath)
+	defer func(filePath *os.File) {
+		err := filePath.Close()
+		if err != nil {
+			logrus.Errorf("close file failed: %v", err)
+		}
+	}(filePath)
+	if err != nil {
+		logrus.Errorf("not fund path[%s], get error: %v", backupPath, err)
+		os.Exit(1)
+	}
+	files, err := filePath.ReadDir(-1)
+	if err != nil {
+		logrus.Errorf("get directory(%s) files failed: %v", backupPath, err)
+		os.Exit(1)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			logrus.Warnf("get directory: %s, skip", file.Name())
+			continue
+		}
+		fileName := fmt.Sprintf("%s%s%s", backupPath, string(os.PathSeparator), file.Name())
+		bytes, err := os.ReadFile(fileName)
+		if err != nil {
+			logrus.Errorf("reading file(%s) failed: %v", fileName, err)
+		} else {
+			err := handler.PutKey(context.TODO(), file.Name(), string(bytes))
+			if err != nil {
+				logrus.Errorf("put key(%s) to etcd failed: %v", file.Name(), err)
+			}
+		}
+	}
 }
 
 func main() {
