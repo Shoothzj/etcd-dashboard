@@ -16,24 +16,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+name: "license check"
 
-name: es lint
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
-    paths:
-      - portal/**
-jobs:
-  es_lint:
 
+jobs:
+  license-check:
+    name: License Check
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: latest
-      - run: npm install -g eslint
-        working-directory: portal
-      - run: npm install && eslint src --ext .html,.js
-        working-directory: portal
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check license header
+        uses: apache/skywalking-eyes@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
