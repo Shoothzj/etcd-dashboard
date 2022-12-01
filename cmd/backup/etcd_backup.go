@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"net/url"
 	"os"
 )
 
@@ -64,9 +65,15 @@ func backup() {
 		os.Exit(1)
 	}
 
+	if err := os.Mkdir(backupPath, os.ModePerm); err != nil {
+		logrus.Errorf("mkdir %s failed: %v", backupPath, err)
+		os.Exit(1)
+	}
+
 	for _, kv := range allKeyContent {
-		name := fmt.Sprintf("%s%s%s", backupPath, string(os.PathSeparator), string(kv.Key))
-		file, err := os.OpenFile(name, os.O_CREATE|os.O_TRUNC, 0600)
+		humanKey := url.QueryEscape(string(kv.Key))
+		name := fmt.Sprintf("%s%s%s", backupPath, string(os.PathSeparator), humanKey)
+		file, err := os.OpenFile(name, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0600)
 		if err != nil {
 			logrus.Errorf("create file(%s) failed: %v", name, err)
 		} else {
@@ -116,9 +123,10 @@ func restore() {
 		if err != nil {
 			logrus.Errorf("reading file(%s) failed: %v", fileName, err)
 		} else {
-			err := handler.PutKey(context.TODO(), file.Name(), string(bytes))
+			humanKey := url.QueryEscape(file.Name())
+			err := handler.PutKey(context.TODO(), humanKey, string(bytes))
 			if err != nil {
-				logrus.Errorf("put key(%s) to etcd failed: %v", file.Name(), err)
+				logrus.Errorf("put key: %s, value: %s to etcd failed: %v", humanKey, string(bytes), err)
 			}
 		}
 	}
